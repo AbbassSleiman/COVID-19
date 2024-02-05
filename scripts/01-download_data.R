@@ -4,23 +4,21 @@
 # Date: 11 February 2023 [...UPDATE THIS...]
 # Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
 # License: MIT
-# Pre-requisites: [...UPDATE THIS...]
+# Pre-requisites: Download scores_lm_demographics.dta from 
+# https://www.openicpsr.org/openicpsr/project/193523/version/V1/view
 # Any other information needed? [...UPDATE THIS...]
 
 
 #### Workspace setup ####
-library(opendatatoronto)
+library(haven)
 library(tidyverse)
-# [...UPDATE THIS...]
+library(usethis)
+library(gitcreds)
 
 #### Download data ####
-# [...ADD CODE HERE TO DOWNLOAD...]
-
-
+test_scores_data <- read_dta(here::here("inputs/data/scores_lm_demographics.dta"))
 
 #### Save data ####
-# [...UPDATE THIS...]
-# change the_raw_data to whatever name you assigned when you downloaded it.
-write_csv(the_raw_data, "inputs/data/raw_data.csv") 
+write_csv(test_scores_data, "inputs/data/scores_lm_demographics.csv") 
 
          
