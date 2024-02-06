@@ -9,36 +9,39 @@
 
 #### Workspace setup ####
 library(tidyverse)
+library(data.table)
 
 #### Clean data ####
-raw_data <- read_csv("inputs/data/plane_data.csv")
+raw_region_data <- read_csv("inputs/data/region_data.csv")
+country_region_data <- read_csv("inputs/data/country_region.csv")
 
-cleaned_data <-
-  raw_data |>
+cleaned_region_data <-
+  raw_region_data |>
   janitor::clean_names() |>
-  select(wing_width_mm, wing_length_mm, flying_time_sec_first_timer) |>
-  filter(wing_width_mm != "caw") |>
-  mutate(
-    flying_time_sec_first_timer = if_else(flying_time_sec_first_timer == "1,35",
-                                   "1.35",
-                                   flying_time_sec_first_timer)
+  rename(
+    covid_score = c1m_school_closing 
   ) |>
-  mutate(wing_width_mm = if_else(wing_width_mm == "490",
-                                 "49",
-                                 wing_width_mm)) |>
-  mutate(wing_width_mm = if_else(wing_width_mm == "6",
-                                 "60",
-                                 wing_width_mm)) |>
-  mutate(
-    wing_width_mm = as.numeric(wing_width_mm),
-    wing_length_mm = as.numeric(wing_length_mm),
-    flying_time_sec_first_timer = as.numeric(flying_time_sec_first_timer)
+  mutate(date = ymd(date)) |>
+  filter(year(date) != 2022) |>
+  select(
+    country_name,
+    region_name,
+    date,
+    covid_score
   ) |>
-  rename(flying_time = flying_time_sec_first_timer,
-         width = wing_width_mm,
-         length = wing_length_mm
-         ) |> 
-  tidyr::drop_na()
+  mutate(
+    country_name = gsub("Faeroe Islands", "Faroe Islands", country_name)
+  )
+
+cleaned_region_data <- as.data.table(cleaned_region_data)
+country_region_data <- as.data.table(country_region_data)
+
+setkey(cleaned_region_data, country_name)
+setkey(country_region_data, country_name)
+
+cleaned_region_data <- country_region_data[cleaned_region_data, .(country_name, region_name, date, covid_score), on = "country_name", nomatch = 0]
+
+cleaned_region_data <- as.data.frame(cleaned_region_data)
 
 #### Save data ####
-write_csv(cleaned_data, "outputs/data/analysis_data.csv")
+fwrite(cleaned_region_data, "outputs/data/cleaned_region_data.csv", row.names = FALSE)
