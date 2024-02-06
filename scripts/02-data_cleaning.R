@@ -36,10 +36,12 @@ cleaned_region_data <-
 cleaned_region_data <- as.data.table(cleaned_region_data)
 country_region_data <- as.data.table(country_region_data)
 
+# Set keys for merging
 setkey(cleaned_region_data, country_name)
 setkey(country_region_data, country_name)
 
-cleaned_region_data <- country_region_data[cleaned_region_data, .(country_name, region_name, date, covid_score), on = "country_name", nomatch = 0]
+# Perform left join
+cleaned_region_data <- country_region_data[cleaned_region_data, on = "country_name", nomatch = 0]
 
 cleaned_region_data <- as.data.frame(cleaned_region_data)
 
