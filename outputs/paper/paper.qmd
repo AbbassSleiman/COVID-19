@@ -38,13 +38,10 @@ library(ggplot2)
 
 #### Replication ####
 
-closed_schools_data <- cleaned_region_data |>
-  filter(covid_score > 1)
-
 # Calculate the number of days schools were closed for each country
-days_closed_per_country <- closed_schools_data |>
+days_closed_per_country <- cleaned_region_data |>
   group_by(region_name, country_name) |>
-  summarize(days_closed = n())
+  summarize(days_closed = sum(covid_score > 1))
 
 # Calculate the mean number of days closed for each region
 mean_days_closed_per_region <- days_closed_per_country |>
