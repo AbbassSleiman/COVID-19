@@ -62,3 +62,4 @@ cleaned_test_score_data <- raw_test_score_data |>
 
 #### Save data ####
 fwrite(cleaned_region_data, "outputs/data/cleaned_region_data.csv", row.names = FALSE)
+write_csv(cleaned_test_score_data, "outputs/data/cleaned_test_score_data.csv")
