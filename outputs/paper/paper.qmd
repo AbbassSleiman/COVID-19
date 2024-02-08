@@ -24,6 +24,7 @@ library(here)
 
 raw_region_data <- read_csv(here("inputs/data/region_data.csv"))
 cleaned_region_data <- read_csv(here("outputs/data/cleaned_region_data.csv"))
+cleaned_test_score_data <- read_csv(here("outputs/data/cleaned_test_score_data.csv"))
 ```
 \newpage
 ```{r}
@@ -70,6 +71,71 @@ ggplot(mean_days_closed_per_region,
 
 \newpage
 
+```{r}
+#| echo: false
+#| message: false
+
+#### Workspace setup ####
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+#### Replication ####
+
+# Calculate the total number of enrollments overall
+total_enrollment <- sum(cleaned_test_score_data$enrollment)
+
+# Filter for Math
+filtered_test_data <- cleaned_test_score_data |>
+  filter(subject == "Math")
+
+# Define in-person percent learning categories
+inperson_group <- c("0-25", "25-50", "50-75", "75-100")
+
+# Change data format into long format from wide format and categorize the in-person share
+long_filtered_test_data <- filtered_test_data |>
+  pivot_longer(cols = starts_with("change_"),
+               names_to = "year_group",
+               values_to = "change_in_pass_rate") |>
+  mutate(inperson_category = cut(share_inperson, breaks = c(-Inf, 0.25, 0.5, 0.75, Inf), labels = inperson_group))
+
+# Group by year and calculate summary statistics
+summary_test_data <- long_filtered_test_data |>
+  group_by(year_group, inperson_category) |>
+  summarize(weighted_avg_change_pass = weighted.mean(change_in_pass_rate, 
+                                                     w = enrollment/total_enrollment, 
+                                                     na.rm = TRUE)) |>
+  ungroup()
+
+# Calculate the overall weighted average pass rate change
+overall_summary_test_data <- long_filtered_test_data |>
+  group_by(year_group) |>
+  summarize(weighted_avg_change_pass = weighted.mean(change_in_pass_rate,
+                                                     w = enrollment/total_enrollment,
+                                                     na.rm = TRUE),
+                                                     inperson_category = "Overall")
+
+# Bind both sets of rows together
+summary_test_data <- bind_rows(summary_test_data, overall_summary_test_data)
+
+# Plot the resultant graph
+ggplot(summary_test_data, aes(x = weighted_avg_change_pass * 100, y = inperson_category, color = year_group)) +
+  geom_point(size = 3) + 
+  geom_vline(xintercept = 0, color = "darkgrey") +
+  scale_x_continuous(limits = c(-17, 3)) +
+  scale_y_discrete(limits = c("75-100", "50-75", "25-50", "0-25", "Overall")) +
+  labs(x = "Average Change in Pass Rate (Percentage Points)", y = "Percent In-Person",
+       title = "Average Change in Pass Rate by Year in Math") +
+  scale_color_discrete(labels = c("Spring 2018", "Spring 2019", "Spring 2021")) +
+  labs(color = "Year Category") +
+  theme_minimal()
+
+```
+
+
+
+\newpage
 
 # References
 
