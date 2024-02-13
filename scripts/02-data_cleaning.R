@@ -12,8 +12,8 @@ library(tidyverse)
 library(data.table)
 
 #### Clean region data ####
-raw_region_data <- read_csv("inputs/data/region_data.csv")
-country_region_data <- read_csv("inputs/data/country_region.csv")
+raw_region_data <- read_csv("data/raw_data/region_data.csv")
+country_region_data <- read_csv("data/raw_data/country_region.csv")
 
 cleaned_region_data <-
   raw_region_data |>
@@ -47,7 +47,7 @@ cleaned_region_data <- as.data.frame(cleaned_region_data)
 
 
 #### Clean test score data ####
-raw_test_score_data <- read_csv("inputs/data/scores_lm_demographics.csv")
+raw_test_score_data <- read_csv("data/raw_data/scores_lm_demographics.csv")
 
 cleaned_test_score_data <- raw_test_score_data |>
   janitor::clean_names() |>
@@ -61,5 +61,5 @@ cleaned_test_score_data <- raw_test_score_data |>
   )
 
 #### Save data ####
-fwrite(cleaned_region_data, "outputs/data/cleaned_region_data.csv", row.names = FALSE)
-write_csv(cleaned_test_score_data, "outputs/data/cleaned_test_score_data.csv")
+fwrite(cleaned_region_data, "data/analysis_data/cleaned_region_data.csv", row.names = FALSE)
+write_csv(cleaned_test_score_data, "data/analysis_data/cleaned_test_score_data.csv")
